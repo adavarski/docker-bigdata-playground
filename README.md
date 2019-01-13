@@ -2,6 +2,7 @@
 Docker containers for running big data platform. Containers for Hadoop NameNode, Hadoop DataNodes, Hive, Impala, Zookeeper and Postgres. 
 ## Building Containers
 All containers are build from docker-compose files, but docker-compose does not support building containers from a base image.  A Makefile has been included to build the containers.
+
 __Build all Containers__
 ```
 make build
