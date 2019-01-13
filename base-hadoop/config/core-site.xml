@@ -1,0 +1,10 @@
+<configuration>
+    <property>
+        <name>fs.defaultFS</name>
+        <value>hdfs://namenode:8020</value>
+    </property>
+    <property>
+        <name>hadoop.registry.zk.quorum</name>
+        <value>zookeeper:2181</value>
+    </property>
+</configuration>

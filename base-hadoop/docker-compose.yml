@@ -1,0 +1,9 @@
+version: "3"
+
+services:
+  base-hadoop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: base-hadoop
+

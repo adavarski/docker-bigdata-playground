@@ -1,0 +1,153 @@
+version: "3"
+
+services:
+
+  #==================================
+  # Zookeeper
+  #==================================
+  zookeeper:
+    build:
+      context: zookeeper
+      dockerfile: Dockerfile
+    image: zookeeper
+    networks:
+    - bigdata-net
+    ports:
+    - 2181:2181
+    - 2888:2888
+    - 3888:3888
+    - 8080:8080
+    environment:
+      SERVER_HTTP_PORT: 9000
+      API_HOST: localhost
+      API_PORT: 9000
+
+  #==================================
+  # Postgres
+  #==================================
+  postgres:
+    build:
+      context: postgres
+      dockerfile: Dockerfile
+    image: postgres
+    networks:
+      - bigdata-net
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: metastore
+
+  #==================================
+  # Hadoop
+  #==================================
+  namenode:
+    build:
+      context: namenode
+      dockerfile: Dockerfile
+    image: namenode
+    external_links:
+      - zookeeper
+    networks:
+      - bigdata-net
+    volumes:
+      - hadoop_hdfs:/hdfs
+    ports:
+      - "50070:50070"
+      - "50075:50075"
+      - "8020:8020"
+      - "8042:8042"
+      - "8088:8088"
+      - "8188:8188"
+      - "19888:19888"
+
+  #==================================
+  # Hadoop DataNodes
+  #==================================
+  datanode-1:
+    build:
+      context: datanode
+      dockerfile: Dockerfile
+    networks:
+      - bigdata-net
+    ports:
+      - "9901:9864"
+      - "8041:8042"
+
+  datanode-2:
+    build:
+      context: datanode
+      dockerfile: Dockerfile
+    networks:
+      - bigdata-net
+    ports:
+      - "9902:9864"
+      - "8043:8042"
+
+  datanode-3:
+    build:
+      context: datanode
+      dockerfile: Dockerfile
+    networks:
+      - bigdata-net
+    ports:
+      - "9903:9864"
+      - "8044:8042"
+  #==================================
+  # Hive
+  #===================================
+  hive:
+    build:
+      context: hive
+      dockerfile: Dockerfile
+    image: hive
+    external_links:
+      - hadoop
+      - zookeeper
+      - postgres
+      - hive
+    networks:
+      - bigdata-net
+    environment:
+      PGPASSWORD: postgres
+    ports:
+      - 10000:10000
+      - 10002:10002
+      - 9083:9083
+      - 50111:50111
+      - 9999:9999
+
+  #==================================
+  # Impala
+  #==================================
+  impala:
+    build:
+      context: impala
+      dockerfile: Dockerfile
+    image: impala
+    networks:
+      - bigdata-net
+    external_links:
+      - hadoop
+      - hive
+      - zookeeper
+      - postgres
+    ports:
+      - 21000:21000
+      - 21050:21050
+      - 25000:25000
+      - 25010:25010
+      - 25020:25020
+
+# Reset volumes
+volumes:
+  hadoop_hdfs: null
+
+networks:
+  default:
+    external:
+      name: bigdata-net
+  bigdata-net:
+    driver: bridge
+
